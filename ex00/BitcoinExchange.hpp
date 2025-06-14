@@ -2,8 +2,10 @@
 # define BITCOINEXCHANGE_HPP
 
 # include <algorithm>
+# include <cstdlib>
 # include <exception>
 # include <fstream>
+# include <iomanip>
 # include <iostream>
 # include <map>
 # include <sstream>
@@ -16,6 +18,9 @@ class BitcoinExchange
 
 	bool isValidDate(const std::string &date);
 	bool isValidValue(const float value);
+	std::string findClosestDate(const std::string &date);
+	bool isLeapYear(int year);
+	bool isValidDayInMonth(int year, int month, int day);
 
   public:
 	BitcoinExchange();
