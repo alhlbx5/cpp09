@@ -1,6 +1,7 @@
 #ifndef RPN_HPP
 # define RPN_HPP
 
+# include <cctype>
 # include <exception>
 # include <iostream>
 # include <sstream>
@@ -14,6 +15,7 @@ class RPN
 
 	bool isOperator(const char c);
 	bool performOperation(const char op);
+	bool isValidToken(const std::string &token);
 
   public:
 	RPN();

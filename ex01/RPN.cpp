@@ -27,6 +27,18 @@ bool RPN::isOperator(const char c)
 	return (c == '+' || c == '-' || c == '*' || c == '/');
 }
 
+bool RPN::isValidToken(const std::string &token)
+{
+	if (token.length() == 1)
+	{
+		if (isOperator(token[0]))
+			return (true);
+		if (isdigit(token[0]))
+			return (true);
+	}
+	return (false);
+}
+
 bool RPN::performOperation(const char op)
 {
 	int	b;
@@ -66,12 +78,16 @@ bool RPN::performOperation(const char op)
 
 bool RPN::evaluate(const std::string &expression)
 {
-			int value;
+	int	value;
 
 	std::istringstream iss(expression);
 	std::string token;
 	while (iss >> token)
 	{
+		if (!isValidToken(token))
+		{
+			return (false);
+		}
 		if (token.length() == 1 && isOperator(token[0]))
 		{
 			if (!performOperation(token[0]))
@@ -81,12 +97,15 @@ bool RPN::evaluate(const std::string &expression)
 		}
 		else
 		{
-			std::istringstream tokenStream(token);
-			tokenStream >> value;
+			value = token[0] - '0';
+			if (value < 0 || value > 9)
+			{
+				return (false);
+			}
 			_operands.push(value);
 		}
 	}
-	return (true);
+	return (_operands.size() == 1);
 }
 
 int RPN::getResult() const
