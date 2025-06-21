@@ -7,4 +7,3 @@ int	main(int argc, char **argv)
 	sorter.processArguments(argc, argv);
 	return (0);
 }
-ls
