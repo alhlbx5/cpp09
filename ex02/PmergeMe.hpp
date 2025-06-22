@@ -6,6 +6,7 @@
 # include <ctime>
 # include <iomanip>
 # include <iostream>
+# include <list>
 # include <sstream>
 # include <string>
 # include <vector>
@@ -14,8 +15,10 @@ class PmergeMe
 {
   private:
 	std::vector<int> _vectorContainer;
+	std::list<int> _listContainer;
 	std::vector<int> _originalSequence;
 	double _vectorSortTime;
+	double _listSortTime;
 
 	template <typename T> void insertionSort(T &container,
 		typename T::iterator begin, typename T::iterator end);

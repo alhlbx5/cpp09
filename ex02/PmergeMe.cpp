@@ -1,6 +1,6 @@
 #include "PmergeMe.hpp"
 
-PmergeMe::PmergeMe() : _vectorSortTime(0)
+PmergeMe::PmergeMe() : _vectorSortTime(0), _listSortTime(0)
 {
 }
 
@@ -18,8 +18,10 @@ PmergeMe &PmergeMe::operator=(const PmergeMe &other)
 	if (this != &other)
 	{
 		this->_vectorContainer = other._vectorContainer;
+		this->_listContainer = other._listContainer;
 		this->_originalSequence = other._originalSequence;
 		this->_vectorSortTime = other._vectorSortTime;
+		this->_listSortTime = other._listSortTime;
 	}
 	return (*this);
 }
@@ -120,6 +122,7 @@ bool PmergeMe::parseArguments(int argc, char **argv)
 		}
 		_originalSequence.push_back(value);
 		_vectorContainer.push_back(value);
+		_listContainer.push_back(value);
 	}
 	return (true);
 }
@@ -139,6 +142,7 @@ void PmergeMe::displayResults()
 	}
 	std::cout << std::endl;
 	std::cout << "Time to process a range of " << _vectorContainer.size() << " elements with std::vector : " << std::fixed << std::setprecision(5) << _vectorSortTime << " us" << std::endl;
+	std::cout << "Time to process a range of " << _listContainer.size() << " elements with std::list : " << std::fixed << std::setprecision(5) << _listSortTime << " us" << std::endl;
 }
 
 bool PmergeMe::processArguments(int argc, char **argv)
@@ -163,6 +167,10 @@ bool PmergeMe::processArguments(int argc, char **argv)
 	fordJohnsonSort(_vectorContainer);
 	end = clock();
 	_vectorSortTime = (end - start) * 1000000.0 / CLOCKS_PER_SEC;
+	start = clock();
+	fordJohnsonSort(_listContainer);
+	end = clock();
+	_listSortTime = (end - start) * 1000000.0 / CLOCKS_PER_SEC;
 	std::cout << "After: ";
 	for (size_t i = 0; i < _vectorContainer.size(); ++i)
 	{
@@ -170,5 +178,6 @@ bool PmergeMe::processArguments(int argc, char **argv)
 	}
 	std::cout << std::endl;
 	std::cout << "Time to process a range of " << _vectorContainer.size() << " elements with std::vector : " << std::fixed << std::setprecision(5) << _vectorSortTime << " us" << std::endl;
+	std::cout << "Time to process a range of " << _listContainer.size() << " elements with std::list : " << std::fixed << std::setprecision(5) << _listSortTime << " us" << std::endl;
 	return (true);
 }
