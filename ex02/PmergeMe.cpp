@@ -2,6 +2,13 @@
 
 PmergeMe::PmergeMe() : _vectorSortTime(0), _listSortTime(0)
 {
+	_jacobsthalNumbers.push_back(0);
+	_jacobsthalNumbers.push_back(1);
+	for (int i = 2; i < 30; ++i)
+	{
+		_jacobsthalNumbers.push_back(_jacobsthalNumbers[i - 1] + 2
+			* _jacobsthalNumbers[i - 2]);
+	}
 }
 
 PmergeMe::~PmergeMe()
@@ -22,8 +29,37 @@ PmergeMe &PmergeMe::operator=(const PmergeMe &other)
 		this->_originalSequence = other._originalSequence;
 		this->_vectorSortTime = other._vectorSortTime;
 		this->_listSortTime = other._listSortTime;
+		this->_jacobsthalNumbers = other._jacobsthalNumbers;
 	}
 	return (*this);
+}
+
+void PmergeMe::generateJacobsthalNumbers(int n)
+{
+	_jacobsthalNumbers.clear();
+	_jacobsthalNumbers.push_back(0);
+	_jacobsthalNumbers.push_back(1);
+	for (int i = 2; i <= n; ++i)
+	{
+		_jacobsthalNumbers.push_back(_jacobsthalNumbers[i - 1] + 2
+			* _jacobsthalNumbers[i - 2]);
+	}
+}
+
+int PmergeMe::getNextJacobsthalIndex(int n)
+{
+	int	i;
+
+	i = 0;
+	while (_jacobsthalNumbers[i] <= n)
+	{
+		++i;
+		if (i >= (int)_jacobsthalNumbers.size())
+		{
+			generateJacobsthalNumbers(i);
+		}
+	}
+	return (_jacobsthalNumbers[i - 1]);
 }
 
 template <typename T> void PmergeMe::insertionSort(T &container,
@@ -95,6 +131,11 @@ template <typename T> void PmergeMe::mergeInsertSort(T &container,
 
 template <typename T> void PmergeMe::fordJohnsonSort(T &container)
 {
+	if (container.size() > 1000)
+	{
+		mergeInsertSort(container, container.begin(), container.end());
+		return ;
+	}
 	mergeInsertSort(container, container.begin(), container.end());
 }
 
@@ -120,9 +161,39 @@ bool PmergeMe::parseArguments(int argc, char **argv)
 			std::cerr << "Error" << std::endl;
 			return (false);
 		}
+		if (value > INT_MAX)
+		{
+			std::cerr << "Error: Integer overflow" << std::endl;
+			return (false);
+		}
 		_originalSequence.push_back(value);
 		_vectorContainer.push_back(value);
 		_listContainer.push_back(value);
+	}
+	return (true);
+}
+
+bool PmergeMe::validateSorting()
+{
+	int	prev;
+
+	for (size_t i = 1; i < _vectorContainer.size(); ++i)
+	{
+		if (_vectorContainer[i - 1] > _vectorContainer[i])
+		{
+			return (false);
+		}
+	}
+	std::list<int>::iterator it = _listContainer.begin();
+	prev = *it;
+	++it;
+	for (; it != _listContainer.end(); ++it)
+	{
+		if (prev > *it)
+		{
+			return (false);
+		}
+		prev = *it;
 	}
 	return (true);
 }
@@ -171,12 +242,52 @@ bool PmergeMe::processArguments(int argc, char **argv)
 	fordJohnsonSort(_listContainer);
 	end = clock();
 	_listSortTime = (end - start) * 1000000.0 / CLOCKS_PER_SEC;
+	if (!validateSorting())
+	{
+		std::cerr << "Error: Sorting failed!" << std::endl;
+		return (false);
+	}
 	std::cout << "After: ";
 	for (size_t i = 0; i < _vectorContainer.size(); ++i)
 	{
 		std::cout << _vectorContainer[i] << " ";
 	}
 	std::cout << std::endl;
+	std::cout << "Time to process a range of " << _vectorContainer.size() << " elements with std::vector : " << std::fixed << std::setprecision(5) << _vectorSortTime << " us" << std::endl;
+	std::cout << "Time to process a range of " << _listContainer.size() << " elements with std::list : " << std::fixed << std::setprecision(5) << _listSortTime << " us" << std::endl;
+	return (true);
+}
+
+bool PmergeMe::runLargeTest(int size)
+{
+	int	value;
+
+	_originalSequence.clear();
+	_vectorContainer.clear();
+	_listContainer.clear();
+	srand(time(NULL));
+	for (int i = 0; i < size; ++i)
+	{
+		value = rand() % 10000;
+		_originalSequence.push_back(value);
+		_vectorContainer.push_back(value);
+		_listContainer.push_back(value);
+	}
+	std::cout << "Running large test with " << size << " elements..." << std::endl;
+	clock_t start, end;
+	start = clock();
+	fordJohnsonSort(_vectorContainer);
+	end = clock();
+	_vectorSortTime = (end - start) * 1000000.0 / CLOCKS_PER_SEC;
+	start = clock();
+	fordJohnsonSort(_listContainer);
+	end = clock();
+	_listSortTime = (end - start) * 1000000.0 / CLOCKS_PER_SEC;
+	if (!validateSorting())
+	{
+		std::cerr << "Error: Sorting failed!" << std::endl;
+		return (false);
+	}
 	std::cout << "Time to process a range of " << _vectorContainer.size() << " elements with std::vector : " << std::fixed << std::setprecision(5) << _vectorSortTime << " us" << std::endl;
 	std::cout << "Time to process a range of " << _listContainer.size() << " elements with std::list : " << std::fixed << std::setprecision(5) << _listSortTime << " us" << std::endl;
 	return (true);
